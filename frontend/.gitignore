@@ -160,3 +160,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Backend build artifacts
+backend/target/
+backend/.mvn/
+
+# Frontend build artifacts  
+frontend/build/
+frontend/node_modules/
