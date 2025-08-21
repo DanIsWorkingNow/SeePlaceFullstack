@@ -1,13 +1,29 @@
 // UPDATED: src/components/PlaceSearchApp.js
-// Enlarged map container for better map viewing experience
+// Added Favorites functionality with FavoritesList component
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import PlaceAutocomplete from './PlaceAutocomplete/PlaceAutocomplete';
 import MapContainer from './Map/MapContainer';
 import SearchHistory from './SearchHistory/SearchHistory';
+import FavoritesList from './FavoritesList/FavoritesList';
 import ErrorBoundary from './common/ErrorBoundary';
 import Header from './common/Header';
 
 const PlaceSearchApp = () => {
+  const dispatch = useDispatch();
+
+  // Handle when user clicks on a favorite place
+  const handleFavoriteSelect = (place) => {
+    console.log('🌟 Selected favorite place:', place);
+    
+    // If you have actions to center map or select place, dispatch them here
+    // Example: dispatch(selectPlace(place));
+    // Example: dispatch(setMapCenter({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }));
+    
+    // You can also trigger map updates or other UI changes here
+    // For now, we're logging it - you can integrate with your existing map actions
+  };
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
@@ -19,16 +35,25 @@ const PlaceSearchApp = () => {
             
             {/* Left sidebar - reduced width on extra large screens */}
             <div className="xl:col-span-1 space-y-6">
+              
+              {/* Search Places Section */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Search Places
+                  🔍 Search Places
                 </h2>
                 <PlaceAutocomplete />
               </div>
               
+              {/* 🆕 NEW: My Favorites Section */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <FavoritesList onPlaceSelect={handleFavoriteSelect} />
+              </div>
+              
+              {/* Search History Section */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <SearchHistory />
               </div>
+              
             </div>
             
             {/* Map section - enlarged and takes more space */}
@@ -46,8 +71,11 @@ const PlaceSearchApp = () => {
               >
                 <div className="p-6 pb-4 flex-shrink-0">
                   <h2 className="text-xl font-semibold text-gray-800">
-                    Map View
+                    🗺️ Map View
                   </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Click on favorites to view them on the map
+                  </p>
                 </div>
                 
                 {/* ENLARGED: Updated calculations for larger map */}

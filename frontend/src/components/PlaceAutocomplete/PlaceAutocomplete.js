@@ -3,11 +3,13 @@
 // The component integrates various sub-components such as PlaceAutocomplete, MapContainer, and SearchHistory.
 // It also includes an ErrorBoundary to catch errors in the component tree. 
 // The main layout is styled using Tailwind CSS classes for a responsive design.
+// 🆕 UPDATED: Added FavoriteButton integration for adding places to favorites directly from search results
 
 import React, { useState, useRef, useEffect } from 'react';
 import { usePlaces } from '../../hooks/usePlaces';
 import { useDebounce } from '../../hooks/useDebounce';
 import LoadingSpinner from '../common/LoadingSpinner';
+import FavoriteButton from '../FavoriteButton/FavoriteButton'; 
 
 const PlaceAutocomplete = () => {
   const [query, setQuery] = useState('');
@@ -44,19 +46,19 @@ const PlaceAutocomplete = () => {
   };
 
   const handlePlaceSelect = (place) => {
-  console.log('🔍 PlaceAutocomplete: Selecting place:', place.name || place.description);
-  
-  // 🛠️ FIXED: Send structured payload with both place and query
-  selectPlace({
-    place: place,
-    query: query.trim()
-  });
-  
-  setQuery(place.description);
-  setShowSuggestions(false);
-  setFocusedIndex(-1);
-  inputRef.current?.blur();
-};
+    console.log('🔍 PlaceAutocomplete: Selecting place:', place.name || place.description);
+    
+    // 🛠️ FIXED: Send structured payload with both place and query
+    selectPlace({
+      place: place,
+      query: query.trim()
+    });
+    
+    setQuery(place.description);
+    setShowSuggestions(false);
+    setFocusedIndex(-1);
+    inputRef.current?.blur();
+  };
 
   const handleKeyDown = (e) => {
     if (!showSuggestions || suggestions.length === 0) return;
@@ -191,6 +193,7 @@ const PlaceAutocomplete = () => {
   );
 };
 
+// 🆕 UPDATED: Enhanced SuggestionItem with FavoriteButton integration
 const SuggestionItem = ({ place, isSelected, onClick }) => {
   const getPlaceIcon = (types) => {
     if (types?.includes('restaurant') || types?.includes('food')) return '🍽️';
@@ -198,30 +201,82 @@ const SuggestionItem = ({ place, isSelected, onClick }) => {
     if (types?.includes('hospital')) return '🏥';
     if (types?.includes('school')) return '🏫';
     if (types?.includes('bank')) return '🏦';
-    if (types?.includes('shopping_mall')) return '🛒';
+    if (types?.includes('shopping_mall')) return '🛍️';
+    if (types?.includes('tourist_attraction')) return '🎯';
+    if (types?.includes('place_of_worship')) return '🕌';
     return '📍';
   };
 
   return (
     <div
-      onClick={onClick}
-      className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 hover:bg-blue-50 transition-colors ${
+      className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 hover:bg-blue-50 transition-colors group ${
         isSelected ? 'bg-blue-50 border-blue-200' : ''
       }`}
     >
-      <div className="flex items-start space-x-3">
-        <span className="text-lg flex-shrink-0 mt-0.5">
-          {getPlaceIcon(place.types || [])}
-        </span>
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-gray-900 truncate">
-            {place.structured_formatting?.main_text || place.description}
-          </div>
-          <div className="text-sm text-gray-500 truncate">
-            {place.structured_formatting?.secondary_text || ''}
+      {/* 🆕 UPDATED: Restructured layout to include favorite button */}
+      <div className="flex items-start justify-between">
+        
+        {/* Main content area - clickable for place selection */}
+        <div 
+          className="flex items-start space-x-3 flex-1 min-w-0"
+          onClick={onClick}
+        >
+          <span className="text-lg flex-shrink-0 mt-0.5">
+            {getPlaceIcon(place.types || [])}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-gray-900 truncate">
+              {place.structured_formatting?.main_text || place.description}
+            </div>
+            <div className="text-sm text-gray-500 truncate">
+              {place.structured_formatting?.secondary_text || ''}
+            </div>
+            {/* 🆕 NEW: Show place rating if available */}
+            {place.rating && (
+              <div className="flex items-center text-xs text-yellow-600 mt-1">
+                <span>⭐</span>
+                <span className="ml-1">{place.rating}</span>
+                {place.user_ratings_total && (
+                  <span className="text-gray-400 ml-1">
+                    ({place.user_ratings_total})
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
+        
+        {/* 🆕 NEW: Favorite button - separate click area */}
+        <div 
+          className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()} // Prevent triggering place selection
+        >
+          <FavoriteButton 
+            place={place} 
+            className="hover:scale-110 transition-transform"
+          />
+        </div>
+        
       </div>
+
+      {/* 🆕 NEW: Optional - Show place types for better context */}
+      {place.types && place.types.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {place.types.slice(0, 3).map((type, index) => (
+            <span 
+              key={index}
+              className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+            >
+              {type.replace(/_/g, ' ')}
+            </span>
+          ))}
+          {place.types.length > 3 && (
+            <span className="text-xs text-gray-400">
+              +{place.types.length - 3} more
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };

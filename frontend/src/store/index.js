@@ -7,6 +7,9 @@ import uiReducer from './slices/uiSlice';
 // import favoritesReducer from './slices/favoritesSlice'; // Uncomment if you have this
 import rootSaga from './sagas/rootSaga'; // Or replace with: import placesSaga from './sagas/placesSaga';
 
+import favoritesReducer from './slices/favoritesSlice';
+import favoritesSaga from './sagas/favoritesSaga';
+
 // Create saga middleware with enhanced error handling
 const sagaMiddleware = createSagaMiddleware({
   onError: (error, { sagaStack }) => {
@@ -16,6 +19,20 @@ const sagaMiddleware = createSagaMiddleware({
     }
   }
 });
+
+// Add to your rootReducer
+const rootReducer = combineReducers({
+  // ... your existing reducers
+  favorites: favoritesReducer,
+});
+
+// Add to your saga configuration
+function* rootSaga() {
+  yield all([
+    // ... your existing sagas
+    favoritesSaga(),
+  ]);
+}
 
 // 🔧 CONFIGURE STORE with proper serialization settings
 const store = configureStore({
