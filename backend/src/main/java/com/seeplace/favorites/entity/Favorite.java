@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,17 +33,18 @@ public class Favorite {
     @Column(name = "place_address", length = 1000)
     private String placeAddress;
     
+    // FIX: Use BigDecimal for precise decimal mapping
     @Column(nullable = false, precision = 10, scale = 8)
-    private Double latitude;
+    private BigDecimal latitude;
     
     @Column(nullable = false, precision = 11, scale = 8)
-    private Double longitude;
+    private BigDecimal longitude;
     
     @Column(name = "place_types", length = 1000)
     private String placeTypes;
     
     @Column(precision = 3, scale = 2)
-    private Double rating;
+    private BigDecimal rating;
     
     @Column(name = "photo_reference", length = 500)
     private String photoReference;

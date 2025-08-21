@@ -20,28 +20,28 @@ public class FavoritesServiceImpl implements FavoritesService {
     private final FavoritesRepository favoritesRepository;
 
     @Override
-    public FavoriteResponse addFavorite(FavoriteRequest request) {
-        // Check if already exists
-        if (favoritesRepository.existsByPlaceIdAndActive(request.getPlaceId())) {
-            throw new RuntimeException("Place already favorited");
-        }
-
-        Favorite favorite = Favorite.builder()
-                .placeId(request.getPlaceId())
-                .placeName(request.getPlaceName())
-                .placeAddress(request.getPlaceAddress())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .placeTypes(request.getPlaceTypes())
-                .rating(request.getRating())
-                .photoReference(request.getPhotoReference())
-                .notes(request.getNotes())
-                .isActive(true)
-                .build();
-
-        Favorite saved = favoritesRepository.save(favorite);
-        return mapToResponse(saved);
+public FavoriteResponse addFavorite(FavoriteRequest request) {
+    // Check if already exists
+    if (favoritesRepository.existsByPlaceIdAndActive(request.getPlaceId())) {
+        throw new RuntimeException("Place already favorited");
     }
+
+    Favorite favorite = Favorite.builder()
+            .placeId(request.getPlaceId())
+            .placeName(request.getPlaceName())
+            .placeAddress(request.getPlaceAddress())
+            .latitude(BigDecimal.valueOf(request.getLatitude()))  // Convert Double to BigDecimal
+            .longitude(BigDecimal.valueOf(request.getLongitude())) // Convert Double to BigDecimal
+            .placeTypes(request.getPlaceTypes())
+            .rating(request.getRating() != null ? BigDecimal.valueOf(request.getRating()) : null)
+            .photoReference(request.getPhotoReference())
+            .notes(request.getNotes())
+            .isActive(true)
+            .build();
+
+    Favorite saved = favoritesRepository.save(favorite);
+    return mapToResponse(saved);
+}
 
     @Override
     @Transactional(readOnly = true)
@@ -75,20 +75,20 @@ public class FavoritesServiceImpl implements FavoritesService {
     }
 
     private FavoriteResponse mapToResponse(Favorite favorite) {
-        return FavoriteResponse.builder()
-                .id(favorite.getId())
-                .placeId(favorite.getPlaceId())
-                .placeName(favorite.getPlaceName())
-                .placeAddress(favorite.getPlaceAddress())
-                .latitude(favorite.getLatitude())
-                .longitude(favorite.getLongitude())
-                .placeTypes(favorite.getPlaceTypes())
-                .rating(favorite.getRating())
-                .photoReference(favorite.getPhotoReference())
-                .notes(favorite.getNotes())
-                .isActive(favorite.getIsActive())
-                .createdAt(favorite.getCreatedAt())
-                .updatedAt(favorite.getUpdatedAt())
-                .build();
-    }
+    return FavoriteResponse.builder()
+            .id(favorite.getId())
+            .placeId(favorite.getPlaceId())
+            .placeName(favorite.getPlaceName())
+            .placeAddress(favorite.getPlaceAddress())
+            .latitude(favorite.getLatitude().doubleValue())  // Convert BigDecimal to Double
+            .longitude(favorite.getLongitude().doubleValue()) // Convert BigDecimal to Double
+            .placeTypes(favorite.getPlaceTypes())
+            .rating(favorite.getRating() != null ? favorite.getRating().doubleValue() : null)
+            .photoReference(favorite.getPhotoReference())
+            .notes(favorite.getNotes())
+            .isActive(favorite.getIsActive())
+            .createdAt(favorite.getCreatedAt())
+            .updatedAt(favorite.getUpdatedAt())
+            .build();
+}
 }
